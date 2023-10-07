@@ -25,6 +25,7 @@ const questions = [
       correctAnswer: "8",
     },
   ];
+  let res = {};
     
 
   let timerContainer = document.getElementById("timer");
@@ -38,7 +39,6 @@ const questions = [
   
   let currentQuestion = 0;
   let timeRemaining = 30;
-  let score = 0;
   let timerInterval;
   
   function startTimer() {
@@ -63,6 +63,11 @@ const questions = [
   
       if (timeRemaining === 0) {
         clearInterval(timerInterval);
+        const answerContainers = quizContainer.querySelectorAll(".question");
+        const selector = `input[name=question${currentQuestion}]:checked`;
+        const userAnswer = (answerContainers[0].querySelector(selector) || {}).value || '';
+        res[currentQuestion] = userAnswer
+        console.log(res)
         showNext();
       }
     }, 1000);
@@ -112,16 +117,19 @@ const questions = [
     const answerContainers = quizContainer.querySelectorAll(".question");
     const selector = `input[name=question${currentQuestion}]:checked`;
     const userAnswer = (answerContainers[0].querySelector(selector) || {}).value;
-  
-    if (userAnswer === questions[currentQuestion].correctAnswer) {
-      score++;
-      displayResult();
-    } else {
-      displayResult();
-    }
+    res[currentQuestion] = userAnswer;
+    displayResult();
   }
   
   function displayResult() {
+     let score = 0;
+
+     for(let key in res){
+         if(questions[key].correctAnswer == res[key]){
+          score++;
+         }
+     }
+
     quizContainer.style.display = "none";
     submitButton.style.display = "none";
     nextButton.style.display = "none";
@@ -143,8 +151,17 @@ const questions = [
     const selector = `input[name=question${currentQuestion}]:checked`;
     const userAnswer = (answerContainers[0].querySelector(selector) || {}).value;
     if (userAnswer === questions[currentQuestion].correctAnswer) {
-      score++;
+       if(res[currentQuestion]){
+            res[currentQuestion] = userAnswer;
+       }
+       else{
+          res[currentQuestion] = userAnswer;
+       }
     }
+    else{
+      res[currentQuestion] = '';
+    }
+    console.log(res)
     if (currentQuestion < questions.length - 1) {
       currentQuestion++;
       DisplayQuiz();
@@ -165,7 +182,7 @@ const questions = [
   function restartQuiz() {
     resetTimer();
     currentQuestion = 0;
-    score = 0;
+    res = {};
     DisplayQuiz();
     resultsContainer.style.display = "none";
     quizContainer.style.display = "block";
